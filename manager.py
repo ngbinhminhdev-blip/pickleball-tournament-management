@@ -51,12 +51,12 @@ class TournamentManager:
         finally:
             conn.close()
 
-    def get_enrolled_player_ids(self, tour_id):
+    def get_enrolled_player_ids(self, tournament_id):
         """Lấy ra ID của các VĐV đã đăng ký giải này (dùng để tích sẵn checkbox)"""
         conn = self.connect()
         cursor = conn.cursor()
         try:
-            cursor.execute('SELECT player_id FROM tournament_players WHERE tournament_id = ?', (tour_id,))
+            cursor.execute('SELECT player_id FROM tournament_players WHERE tournament_id = ?', (tournament_id,))
             return [row[0] for row in cursor.fetchall()]
         except Exception as e:
             print(f"❌ Lỗi lấy ID VĐV: {e}")
@@ -64,7 +64,7 @@ class TournamentManager:
         finally:
             conn.close()
 
-    def get_tournament_players(self, tour_id):
+    def get_tournament_players(self, tournament_id):
         """Lấy chi tiết thông tin VĐV thực sự tham gia giải này (để bốc thăm)"""
         conn = self.connect()
         cursor = conn.cursor()
@@ -75,7 +75,7 @@ class TournamentManager:
                 FROM players p
                 JOIN tournament_players tp ON p.id = tp.player_id
                 WHERE tp.tournament_id = ?
-            ''', (tour_id,))
+            ''', (tournament_id,))
             return cursor.fetchall()
         except Exception as e:
             print(f"❌ Lỗi lấy danh sách VĐV của giải: {e}")
@@ -83,13 +83,13 @@ class TournamentManager:
         finally:
             conn.close()
 
-    def update_tournament_players(self, tour_id, player_ids):
+    def update_tournament_players(self, tournament_id, player_ids):
         """Lưu danh sách VĐV do Ban Tổ Chức vừa tích chọn"""
         conn = self.connect()
         cursor = conn.cursor()
         try:
             # Bước A: Xóa danh sách đăng ký cũ của giải này cho sạch sẽ
-            cursor.execute('DELETE FROM tournament_players WHERE tournament_id = ?', (tour_id,))
+            cursor.execute('DELETE FROM tournament_players WHERE tournament_id = ?', (tournament_id,))
             
             # Bước B: Lưu danh sách mới mà bạn vừa tích chọn
             if player_ids:
@@ -97,9 +97,9 @@ class TournamentManager:
                     cursor.execute('''
                         INSERT INTO tournament_players (tournament_id, player_id) 
                         VALUES (?, ?)
-                    ''', (tour_id, pid))
+                    ''', (tournament_id, pid))
             conn.commit()
-            print(f"✅ Đã chốt danh sách {len(player_ids)} VĐV cho giải {tour_id}")
+            print(f"✅ Đã chốt danh sách {len(player_ids)} VĐV cho giải {tournament_id}")
         except Exception as e:
             print(f"❌ Lỗi cập nhật danh sách VĐV: {e}")
         finally:
@@ -322,7 +322,7 @@ class TournamentManager:
         finally:
             conn.close()
 
-    def generate_third_place(self, tour_id):
+    def generate_third_place(self, tournament_id):
         """Xếp lịch trận Tranh hạng 3 (Xóa rác cũ, ép tạo mới)"""
         conn = self.connect()
         cursor = conn.cursor()
@@ -335,7 +335,7 @@ class TournamentManager:
                 AND stage IN ('Bán kết 1', 'Bán kết 2') 
                 AND winner_team_id IS NOT NULL 
                 AND winner_team_id != ''
-            ''', (tour_id,))
+            ''', (tournament_id,))
             semis = cursor.fetchall()
             
             if len(semis) >= 2:
@@ -351,13 +351,13 @@ class TournamentManager:
                 loser2 = team_a_2 if win_2 == team_b_2 else team_b_2
                 
                 # QUAN TRỌNG NHẤT: Xóa sạch trận Tranh hạng 3 "rác" cũ nếu có
-                cursor.execute('DELETE FROM matches WHERE tournament_id = ? AND stage = ?', (tour_id, 'Tranh hạng 3'))
+                cursor.execute('DELETE FROM matches WHERE tournament_id = ? AND stage = ?', (tournament_id, 'Tranh hạng 3'))
                 
                 # Tạo trận mới toanh
                 cursor.execute('''
                     INSERT INTO matches (tournament_id, team_a_id, team_b_id, stage)
                     VALUES (?, ?, ?, 'Tranh hạng 3')
-                ''', (tour_id, loser1, loser2))
+                ''', (tournament_id, loser1, loser2))
                 conn.commit()
                 print(f"✅ Đã dọn rác và chốt Tranh hạng 3: {loser1} vs {loser2}")
         except Exception as e:
@@ -365,7 +365,7 @@ class TournamentManager:
         finally:
             conn.close()
 
-    def generate_final_only(self, tour_id):
+    def generate_final_only(self, tournament_id):
         """Xếp lịch trận Chung kết (Xóa rác cũ, ép tạo mới)"""
         conn = self.connect()
         cursor = conn.cursor()
@@ -378,20 +378,20 @@ class TournamentManager:
                 AND stage IN ('Bán kết 1', 'Bán kết 2') 
                 AND winner_team_id IS NOT NULL 
                 AND winner_team_id != ''
-            ''', (tour_id,))
+            ''', (tournament_id,))
             winners = [str(row[0]) for row in cursor.fetchall()]
             
             if len(winners) >= 2:
                 win1, win2 = winners[-2], winners[-1]
                 
                 # QUAN TRỌNG NHẤT: Xóa sạch trận Chung kết "rác" cũ
-                cursor.execute('DELETE FROM matches WHERE tournament_id = ? AND stage = ?', (tour_id, 'Chung kết'))
+                cursor.execute('DELETE FROM matches WHERE tournament_id = ? AND stage = ?', (tournament_id, 'Chung kết'))
                 
                 # Tạo trận mới toanh
                 cursor.execute('''
                     INSERT INTO matches (tournament_id, team_a_id, team_b_id, stage)
                     VALUES (?, ?, ?, 'Chung kết')
-                ''', (tour_id, win1, win2))
+                ''', (tournament_id, win1, win2))
                 conn.commit()
                 print(f"✅ Đã dọn rác và chốt Chung kết: {win1} vs {win2}")
         except Exception as e:
@@ -636,20 +636,20 @@ class TournamentManager:
         finally:
             conn.close()     
 
-    def delete_tournament(self, tour_id):
+    def delete_tournament(self, tournament_id):
         """Xóa giải đấu (Tự động dò tên cột ID)"""
         conn = self.connect()
         cursor = conn.cursor()
         try:
-            cursor.execute('DELETE FROM matches WHERE tournament_id = ?', (int(tour_id),))
+            cursor.execute('DELETE FROM matches WHERE tournament_id = ?', (int(tournament_id),))
         
             try:
-                cursor.execute('DELETE FROM tournaments WHERE id = ?', (int(tour_id),))
+                cursor.execute('DELETE FROM tournaments WHERE id = ?', (int(tournament_id),))
             except:
                 try:
-                    cursor.execute('DELETE FROM tournaments WHERE tour_id = ?', (int(tour_id),))
+                    cursor.execute('DELETE FROM tournaments WHERE tournament_id = ?', (int(tournament_id),))
                 except:
-                    cursor.execute('DELETE FROM tournaments WHERE tournament_id = ?', (int(tour_id),))
+                    cursor.execute('DELETE FROM tournaments WHERE tournament_id = ?', (int(tournament_id),))
                     
             conn.commit()
         except Exception as e:
@@ -660,26 +660,26 @@ class TournamentManager:
 if __name__ == "__main__":
     manager = TournamentManager()    
     print("\n--- 1. KHỞI TẠO GIẢI ĐẤU & XẾP LỊCH BẢNG ---")
-    tour_id = manager.create_tournament("Cúp Pickleball Vô Địch Mùa Hè", "Group + Knockout")
-    manager.generate_group_stage(tour_id)
+    tournament_id = manager.create_tournament("Cúp Pickleball Vô Địch Mùa Hè", "Group + Knockout")
+    manager.generate_group_stage(tournament_id)
 
     print("\n--- 2. KẾT QUẢ VÒNG BẢNG ---")
     manager.update_score(match_id=1, score_a=11, score_b=8)
     manager.update_score(match_id=2, score_a=5, score_b=11)
     
     print("\n--- 3. CHIA NHÁNH BÁN KẾT ---")
-    manager.generate_semi_finals(tour_id)
+    manager.generate_semi_finals(tournament_id)
     
     print("\n--- 4. TRỌNG TÀI NHẬP KẾT QUẢ BÁN KẾT ---")
     manager.update_score(match_id=3, score_a=15, score_b=13)
     manager.update_score(match_id=4, score_a=9, score_b=11)
 
     print("\n--- 5. TẠO LỊCH CHUNG KẾT ---")
-    manager.generate_finals(tour_id)
+    manager.generate_finals(tournament_id)
 
     print("\n--- 6. KẾT QUẢ TRẬN CHUNG KẾT ---")
     manager.update_score(match_id=5, score_a=11, score_b=7) # Đội thắng cúp!
     manager.update_score(match_id=6, score_a=11, score_b=9)
 
     print("\n🏆 BẢNG TỔNG SẮP TOÀN GIẢI ĐẤU 🏆")
-    manager.show_matches(tour_id)
+    manager.show_matches(tournament_id)

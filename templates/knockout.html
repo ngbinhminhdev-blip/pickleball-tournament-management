@@ -90,7 +90,7 @@
                                 <div class="form-box">
                                     <form action="/update_score" method="POST">
                                         <input type="hidden" name="match_id" value="{{ match[0] }}">
-                                        <input type="hidden" name="tour_id" value="{{ tour_id }}">
+                                        <input type="hidden" name="tournament_id" value="{{ tournament_id }}">
                                         <input type="hidden" name="stage" value="{{ match[6] }}">
                                         <input type="hidden" name="is_knockout" value="true">
                                         
@@ -124,7 +124,7 @@
                             {% else %}
                                 <form action="/update_score" method="POST">
                                     <input type="hidden" name="match_id" value="{{ match[0] }}">
-                                    <input type="hidden" name="tour_id" value="{{ tour_id }}">
+                                    <input type="hidden" name="tournament_id" value="{{ tournament_id }}">
                                     <input type="hidden" name="stage" value="{{ match[6] }}">
                                     <input type="hidden" name="is_knockout" value="true">
                                     
@@ -159,7 +159,7 @@
                             {% else %}
                                 <form action="/update_score" method="POST">
                                     <input type="hidden" name="match_id" value="{{ match[0] }}">
-                                    <input type="hidden" name="tour_id" value="{{ tour_id }}">
+                                    <input type="hidden" name="tournament_id" value="{{ tournament_id }}">
                                     <input type="hidden" name="stage" value="{{ match[6] }}">
                                     <input type="hidden" name="is_knockout" value="true">
                                     
@@ -179,7 +179,7 @@
         </div>
     {% endif %}
 
-    <a href="/tournament/{{ tour_id }}" class="back-btn">⬅ Quay lại màn hình Quản lý Vòng Bảng</a>
+    <a href="/tournament/{{ tournament_id }}" class="back-btn">⬅ Quay lại màn hình Quản lý Vòng Bảng</a>
 
     <!-- SCRIPT ĐIỀU KHIỂN TAB -->
     <script>

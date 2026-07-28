@@ -61,9 +61,9 @@ def auto_pair_women():
     manager.auto_pair_same_gender('Nữ')
     return redirect(url_for('home'))
 
-@app.route('/tournament/<int:tour_id>')
-def tournament(tour_id):
-    matches = manager.get_matches(tour_id)
+@app.route('/tournament/<int:tournament_id>')
+def tournament(tournament_id):
+    matches = manager.get_matches(tournament_id)
     group_a_teams = []
     group_b_teams = []
     
@@ -79,14 +79,14 @@ def tournament(tour_id):
     
     return render_template('tournament.html', 
                            matches=matches, 
-                           tour_id=tour_id,
+                           tournament_id=tournament_id,
                            group_a=group_a,
                            group_b=group_b,
                            )
 
-@app.route('/knockout/<int:tour_id>')
-def knockout_stage(tour_id):
-    all_matches = manager.get_matches(tour_id)
+@app.route('/knockout/<int:tournament_id>')
+def knockout_stage(tournament_id):
+    all_matches = manager.get_matches(tournament_id)
     knockout_matches = [m for m in all_matches if 'Bán kết' in m[6] or 'Chung kết' in m[6] or 'Tranh hạng 3' in m[6]]
     
     def is_valid(m):
@@ -101,12 +101,12 @@ def knockout_stage(tour_id):
         for m in knockout_matches
     ]
     
-    return render_template('knockout.html', matches=knockout_matches, tour_id=tour_id)
+    return render_template('knockout.html', matches=knockout_matches, tournament_id=tournament_id)
 
 @app.route('/update_score', methods=['POST'])
 def update_score():
     match_id = request.form.get('match_id', type=int)
-    tour_id = request.form.get('tour_id')
+    tournament_id = request.form.get('tournament_id')
     stage = request.form.get('stage')
 
     if stage in ['Bán kết 1', 'Bán kết 2', 'Chung kết', 'Tranh hạng 3']:
@@ -118,7 +118,7 @@ def update_score():
         s3b = request.form.get('set3_b', type=int) 
 
         if None in (s1a, s1b, s2a, s2b):
-            return redirect(url_for('knockout_stage', tour_id=tour_id))
+            return redirect(url_for('knockout_stage', tournament_id=tournament_id))
 
         win_sets_a = 0
         win_sets_b = 0
@@ -136,7 +136,7 @@ def update_score():
         if match_id and win_sets_a != win_sets_b:
             manager.update_score(match_id, win_sets_a, win_sets_b)
 
-        return redirect(url_for('knockout_stage', tour_id=tour_id))
+        return redirect(url_for('knockout_stage', tournament_id=tournament_id))
 
     else:
         score_a = request.form.get('score_a', type=int)
@@ -145,46 +145,46 @@ def update_score():
         if match_id and score_a is not None and score_b is not None:
             manager.update_score(match_id, score_a, score_b)
 
-        return redirect(url_for('tournament', tour_id=tour_id))
+        return redirect(url_for('tournament', tournament_id=tournament_id))
 
-@app.route('/gen_group/<int:tour_id>')
-def gen_group(tour_id):
-    print(f"📢 ALO ALO! ĐÃ BẤM NÚT TẠO BẢNG CHO GIẢI {tour_id}")
-    manager.generate_group_stage(tour_id)
-    return redirect(url_for('tournament', tour_id=tour_id))
+@app.route('/gen_group/<int:tournament_id>')
+def gen_group(tournament_id):
+    print(f"📢 ALO ALO! ĐÃ BẤM NÚT TẠO BẢNG CHO GIẢI {tournament_id}")
+    manager.generate_group_stage(tournament_id)
+    return redirect(url_for('tournament', tournament_id=tournament_id))
 
-@app.route('/gen_semi_group/<int:tour_id>')
-def gen_semi_group(tour_id):
-    manager.generate_semi_finals_group(tour_id)
-    return redirect(url_for('knockout_stage', tour_id=tour_id))
+@app.route('/gen_semi_group/<int:tournament_id>')
+def gen_semi_group(tournament_id):
+    manager.generate_semi_finals_group(tournament_id)
+    return redirect(url_for('knockout_stage', tournament_id=tournament_id))
 
 
-@app.route('/gen_rr/<int:tour_id>')
-def gen_rr(tour_id):
-    manager.generate_round_robin(tour_id)
-    return redirect(url_for('tournament', tour_id=tour_id))
+@app.route('/gen_rr/<int:tournament_id>')
+def gen_rr(tournament_id):
+    manager.generate_round_robin(tournament_id)
+    return redirect(url_for('tournament', tournament_id=tournament_id))
 
-@app.route('/gen_semi_rr/<int:tour_id>')
-def gen_semi_rr(tour_id):
-    manager.generate_semi_finals_rr(tour_id)
-    return redirect(url_for('tournament', tour_id=tour_id))
+@app.route('/gen_semi_rr/<int:tournament_id>')
+def gen_semi_rr(tournament_id):
+    manager.generate_semi_finals_rr(tournament_id)
+    return redirect(url_for('tournament', tournament_id=tournament_id))
 
-@app.route('/generate_third_place/<int:tour_id>')
-def generate_third_place_route(tour_id):
-    manager.generate_third_place(tour_id)
+@app.route('/generate_third_place/<int:tournament_id>')
+def generate_third_place_route(tournament_id):
+    manager.generate_third_place(tournament_id)
    
-    return redirect(f'/knockout/{tour_id}')
+    return redirect(f'/knockout/{tournament_id}')
 
-@app.route('/generate_final_only/<int:tour_id>')
-def generate_final_only_route(tour_id):
-    manager.generate_final_only(tour_id)
-    return redirect(f'/knockout/{tour_id}')
+@app.route('/generate_final_only/<int:tournament_id>')
+def generate_final_only_route(tournament_id):
+    manager.generate_final_only(tournament_id)
+    return redirect(f'/knockout/{tournament_id}')
 
 
-@app.route('/delete_this_tour/<int:tour_id>')
-def delete_tour_final(tour_id):
+@app.route('/delete_this_tour/<int:tournament_id>')
+def delete_tour_final(tournament_id):
     try:
-        manager.delete_tournament(tour_id)
+        manager.delete_tournament(tournament_id)
     except Exception as e:
         print(f"Lỗi: {e}") 
     return redirect(url_for('home'))

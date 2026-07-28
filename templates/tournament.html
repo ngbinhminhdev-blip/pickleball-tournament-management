@@ -30,10 +30,10 @@
                 <a href="/" style="background: #7f8c8d; color: white; padding: 10px 15px; text-decoration: none; border-radius: 6px; font-weight: bold; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                     ⬅ Quay lại
                 </a>
-                <h1 style="margin: 0; color: #2c3e50; font-size: 2em;">🏆 Quản lý Giải ID: {{ tour_id }}</h1>
+                <h1 style="margin: 0; color: #2c3e50; font-size: 2em;">🏆 Quản lý Giải ID: {{ tournament_id }}</h1>
             </div>
             
-            <a href="/delete_this_tour/{{ tour_id }}" 
+            <a href="/delete_this_tour/{{ tournament_id }}" 
                style="background-color: #e74c3c; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold;"
                onclick="return confirm('Bạn có chắc chắn muốn xóa không?');">
                🗑️ Xóa Giải Này
@@ -46,20 +46,20 @@
             
             <div style="margin-bottom: 15px; padding: 10px; background: #e8f8f5; border-radius: 5px;">
                 <strong style="color: #16a085; display: block; margin-bottom: 10px;">CÁCH 1: THỂ THỨC CHIA 2 BẢNG</strong>
-                <a href="/gen_group/{{ tour_id }}" class="panel-btn" style="background-color: #1abc9c;">1. Tạo Bảng A & B</a>
-                <a href="/gen_semi_group/{{ tour_id }}" class="panel-btn" style="background-color: #16a085;">2. Chốt Bán Kết (Nhất A vs Nhì B)</a>
+                <a href="/gen_group/{{ tournament_id }}" class="panel-btn" style="background-color: #1abc9c;">1. Tạo Bảng A & B</a>
+                <a href="/gen_semi_group/{{ tournament_id }}" class="panel-btn" style="background-color: #16a085;">2. Chốt Bán Kết (Nhất A vs Nhì B)</a>
             </div>
 
             <div style="margin-bottom: 15px; padding: 10px; background: #fdf2e9; border-radius: 5px;">
                 <strong style="color: #d35400; display: block; margin-bottom: 10px;">CÁCH 2: THỂ THỨC VÒNG TRÒN 1 BẢNG</strong>
-                <a href="/gen_rr/{{ tour_id }}" class="panel-btn" style="background-color: #e67e22;">1. Tạo Lịch Vòng Tròn</a>
-                <a href="/gen_semi_rr/{{ tour_id }}" class="panel-btn" style="background-color: #d35400;">2. Chốt Bán Kết (Top 4)</a>
+                <a href="/gen_rr/{{ tournament_id }}" class="panel-btn" style="background-color: #e67e22;">1. Tạo Lịch Vòng Tròn</a>
+                <a href="/gen_semi_rr/{{ tournament_id }}" class="panel-btn" style="background-color: #d35400;">2. Chốt Bán Kết (Top 4)</a>
             </div>
 
             <div style="padding: 10px; background: #f5eef8; border-radius: 5px;">
                 <strong style="color: #8e44ad; display: block; margin-bottom: 10px;">BƯỚC CUỐI CÙNG (DÙNG CHUNG)</strong>
-                <a href="/generate_third_place/{{ tour_id }}" class="panel-btn" style="background-color: #e67e22; margin-bottom: 5px;">🥉 3. Tranh Hạng 3</a>
-                <a href="/generate_final_only/{{ tour_id }}" class="panel-btn" style="background-color: #9b59b6; margin-bottom: 5px;">🏆 4. Chung Kết</a>
+                <a href="/generate_third_place/{{ tournament_id }}" class="panel-btn" style="background-color: #e67e22; margin-bottom: 5px;">🥉 3. Tranh Hạng 3</a>
+                <a href="/generate_final_only/{{ tournament_id }}" class="panel-btn" style="background-color: #9b59b6; margin-bottom: 5px;">🏆 4. Chung Kết</a>
             </div>
         </div>
 
@@ -120,7 +120,7 @@
                     {% else %}
                         <form action="/update_score" method="POST" style="display:inline;">
                             <input type="hidden" name="match_id" value="{{ match[0] }}">
-                            <input type="hidden" name="tour_id" value="{{ tour_id }}">
+                            <input type="hidden" name="tournament_id" value="{{ tournament_id }}">
                             <input type="hidden" name="stage" value="{{ match[6] }}">
                             
                             {% if match[6] == 'Bán kết 1' or match[6] == 'Bán kết 2' or match[6] == 'Chung kết' or match[6] == 'Tranh hạng 3' %}
