@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Sân Khấu Vòng Trong</title>
+    <style>
+        body { background-color: #1a1a2e; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 40px; }
+        h1 { text-align: center; color: #f1c40f; text-shadow: 0 0 15px rgba(241, 196, 15, 0.5); font-size: 3em; margin-bottom: 30px; text-transform: uppercase;}
+        
+        /* === BỘ NÚT CHUYỂN TAB MỚI === */
+        .tab-container { display: flex; justify-content: center; gap: 15px; margin-bottom: 40px; flex-wrap: wrap;}
+        .tab-btn { background: #16213e; color: #fff; border: 2px solid #0f3460; padding: 12px 25px; font-size: 1.1em; font-weight: bold; border-radius: 8px; cursor: pointer; transition: 0.3s; text-transform: uppercase;}
+        .tab-btn:hover { border-color: #e74c3c; background: #22345c;}
+        .tab-btn.active { background: #f1c40f; color: #000; border-color: #f1c40f; box-shadow: 0 0 15px rgba(241, 196, 15, 0.6); }
+        .tab-content { display: none; animation: fadeIn 0.4s ease-in-out;}
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* ============================ */
+
+        .stage-title { text-align: center; background: #e74c3c; padding: 10px; margin: 20px auto 20px; max-width: 300px; border-radius: 5px; font-weight: bold; font-size: 1.2em; text-transform: uppercase; box-shadow: 0 4px 10px rgba(0,0,0,0.3);}
+        
+        /* Tiêu đề riêng */
+        .final-title { background: #f1c40f; color: #000; box-shadow: 0 0 20px #f1c40f; max-width: 400px; font-size: 1.5em;}
+        .third-title { background: #cd7f32; color: #fff; box-shadow: 0 0 20px #cd7f32; max-width: 400px; font-size: 1.5em; }
+        
+        .match-card { background: #16213e; border: 2px solid #0f3460; border-radius: 15px; padding: 30px; margin: 0 auto 30px; max-width: 600px; text-align: center; box-shadow: 0 8px 20px rgba(0,0,0,0.5); }
+        .match-card:hover { border-color: #f1c40f; transition: 0.3s; }
+        
+        .teams { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; font-size: 1.8em; font-weight: bold;}
+        .vs { color: #e74c3c; font-size: 1em; text-shadow: 0 0 10px red; padding: 0 20px; }
+        
+        .form-box { background: rgba(0,0,0,0.3); padding: 20px; border-radius: 10px; border: 1px solid #1f4068; }
+        .set-row { margin-bottom: 12px; font-size: 20px; color: #bdc3c7;}
+        input[type="number"] { width: 60px; height: 40px; text-align: center; font-size: 20px; font-weight: bold; border: 2px solid #0f3460; border-radius: 5px; background: #1a1a2e; color: #f1c40f; }
+        
+        button[type="submit"] { background: linear-gradient(45deg, #f1c40f, #e67e22); color: #000; border: none; padding: 15px 30px; font-size: 18px; font-weight: bold; border-radius: 8px; cursor: pointer; text-transform: uppercase; width: 100%; margin-top: 15px; box-shadow: 0 4px 15px rgba(241, 196, 15, 0.4); transition: 0.2s;}
+        button[type="submit"]:hover { transform: scale(1.02); filter: brightness(1.1); }
+        
+        .winner { color: #2ecc71; font-size: 1.8em; text-transform: uppercase; display: block; font-weight: bold; text-shadow: 0 0 15px #2ecc71; margin-top: 20px; border-top: 1px dashed #2ecc71; padding-top: 15px;}
+        .back-btn { display: block; text-align: center; margin-top: 60px; color: #aaa; text-decoration: none; font-size: 1.1em; transition: 0.3s; }
+        .back-btn:hover { color: #f1c40f; }
+
+        /* ==================================================
+           Giao diện riêng của TRANH HẠNG 3
+           ================================================== */
+        .third-stage-container { position: relative; width: 100%; max-width: 900px; height: 500px; margin: 0 auto 50px; background: url('/static/images/third_bg.jpg') no-repeat center center; background-size: cover; border: 5px solid #cd7f32; border-radius: 20px; display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 30px; box-shadow: 0 0 40px rgba(205, 127, 50, 0.5); }
+        .third-form-overlay { background: rgba(26, 26, 46, 0.88); padding: 25px; border-radius: 15px; width: 85%; margin: 0 auto; border: 1px solid #cd7f32; text-align: center; }
+        .third-winner-glow { font-size: 2.2em; color: #cd7f32; text-shadow: 0 0 20px #cd7f32, 0 0 30px #e67e22; animation: glowThird 1.5s ease-in-out infinite alternate; margin: 15px 0 0 0; text-transform: uppercase; }
+        @keyframes glowThird { from { text-shadow: 0 0 10px #cd7f32; } to { text-shadow: 0 0 30px #cd7f32, 0 0 40px #e67e22; } }
+
+        /* ==================================================
+           Giao diện riêng của CHUNG KẾT
+           ================================================== */
+        .final-stage-container { position: relative; width: 100%; max-width: 900px; height: 550px; margin: 0 auto 50px; background: url('/static/images/final_bg.jpg') no-repeat center center; background-size: cover; border: 5px solid #f1c40f; border-radius: 20px; display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 30px; box-shadow: 0 0 50px rgba(241, 196, 15, 0.6); }
+        .final-form-overlay { background: rgba(26, 26, 46, 0.88); padding: 25px; border-radius: 15px; width: 85%; margin: 0 auto; border: 1px solid #f1c40f; text-align: center; }
+        .final-winner-glow { font-size: 2.2em; color: #f1c40f; text-shadow: 0 0 20px #f1c40f, 0 0 30px #e67e22; animation: glow 1.5s ease-in-out infinite alternate; margin: 15px 0 0 0; text-transform: uppercase; }
+        @keyframes glow { from { text-shadow: 0 0 10px #f1c40f; } to { text-shadow: 0 0 30px #f1c40f, 0 0 40px #e67e22; } }
+    </style>
+</head>
+<body>
+    <h1>🏆 KHÁN ĐÀI VÒNG TRONG 🏆</h1>
+
+    {% if not matches %}
+        <div style="text-align: center; color: #666; margin-top: 50px;">
+            <h3>Chưa có trận đấu nào được xếp lịch ở vòng này.</h3>
+            <p>Vui lòng quay lại Vòng bảng và bấm "Chốt Bán Kết" hoặc "Xếp Chung Kết".</p>
+        </div>
+    {% else %}
+        <!-- THANH CHUYỂN TAB -->
+        <div class="tab-container">
+            <button class="tab-btn active" onclick="switchTab('semi-tab', this)">⚔️ Vòng Bán Kết</button>
+            <button class="tab-btn" onclick="switchTab('third-tab', this)">🥉 Tranh Hạng 3</button>
+            <button class="tab-btn" onclick="switchTab('final-tab', this)">🏆 Chung Kết Trong Mơ</button>
+        </div>
+
+        <!-- TAB 1: BÁN KẾT -->
+        <div id="semi-tab" class="tab-content active">
+            {% for stage_name in ['Bán kết 1', 'Bán kết 2'] %}
+                {% for match in matches %}
+                    {% if match[6] == stage_name %}
+                        <div class="stage-title">{{ stage_name }}</div>
+                        <div class="match-card">
+                            <div class="teams">
+                                <span>Đội {{ match[1] }}</span><span class="vs">VS</span><span>Đội {{ match[2] }}</span>
+                            </div>
+                            {% if match[5] %}
+                                <div style="font-size: 26px; color: #fff; margin: 15px 0;">Tỉ số Set: <strong style="color:#f1c40f;">{{ match[3] }} - {{ match[4] }}</strong></div>
+                                <span class="winner">🎉 ĐỘI {{ match[5] }} CHIẾN THẮNG 🎉</span>
+                            {% else %}
+                                <div class="form-box">
+                                    <form action="/update_score" method="POST">
+                                        <input type="hidden" name="match_id" value="{{ match[0] }}">
+                                        <input type="hidden" name="tour_id" value="{{ tour_id }}">
+                                        <input type="hidden" name="stage" value="{{ match[6] }}">
+                                        <input type="hidden" name="is_knockout" value="true">
+                                        
+                                        <div class="set-row">Set 1: <input type="number" name="set1_a" required> — <input type="number" name="set1_b" required></div>
+                                        <div class="set-row">Set 2: <input type="number" name="set2_a" required> — <input type="number" name="set2_b" required></div>
+                                        <div class="set-row">Set 3: <input type="number" name="set3_a"> — <input type="number" name="set3_b"></div>
+                                        <div style="font-size: 13px; color: #5dade2; margin-bottom: 15px; font-style: italic;">* Set 3 để trống nếu tỉ số là 2-0</div>
+                                        <button type="submit">Chốt Kết Quả</button>
+                                    </form>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            {% endfor %}
+        </div>
+
+        <!-- TAB 2: TRANH HẠNG 3 (Đã có ảnh nền Đồng) -->
+        <div id="third-tab" class="tab-content">
+            {% for match in matches %}
+                {% if match[6] == 'Tranh hạng 3' %}
+                    <div class="stage-title third-title">🥉 TRẬN TRANH HUY CHƯƠNG ĐỒNG 🥉</div>
+                    <div class="third-stage-container">
+                        <div class="third-form-overlay">
+                            <div class="teams" style="justify-content: center; margin-bottom: 10px;">
+                                <span>Đội {{ match[1] }}</span><span class="vs" style="padding: 0 40px;">VS</span><span>Đội {{ match[2] }}</span>
+                            </div>
+                            {% if match[5] %}
+                                <div style="font-size: 24px; color: #fff; margin-bottom: 10px;">Tỉ số Set: <strong style="color:#cd7f32;">{{ match[3] }} - {{ match[4] }}</strong></div>
+                                <h2 class="third-winner-glow">🥉 ĐỘI {{ match[5] }} ĐOẠT HẠNG 3 🥉</h2>
+                            {% else %}
+                                <form action="/update_score" method="POST">
+                                    <input type="hidden" name="match_id" value="{{ match[0] }}">
+                                    <input type="hidden" name="tour_id" value="{{ tour_id }}">
+                                    <input type="hidden" name="stage" value="{{ match[6] }}">
+                                    <input type="hidden" name="is_knockout" value="true">
+                                    
+                                    <div style="display: flex; justify-content: space-around; align-items: center; margin: 15px 0;">
+                                        <div class="set-row" style="margin-bottom:0;">S1: <input type="number" name="set1_a" required> - <input type="number" name="set1_b" required></div>
+                                        <div class="set-row" style="margin-bottom:0;">S2: <input type="number" name="set2_a" required> - <input type="number" name="set2_b" required></div>
+                                        <div class="set-row" style="margin-bottom:0;">S3: <input type="number" name="set3_a"> - <input type="number" name="set3_b"></div>
+                                    </div>
+                                    <div style="font-size: 13px; color: #5dade2; margin-bottom: 15px; font-style: italic;">* Set 3 để trống nếu tỉ số là 2-0</div>
+                                    <button type="submit" style="margin-top: 5px;">KHAI HỎA - CHỐT HẠNG 3</button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <!-- TAB 3: CHUNG KẾT (Giao diện rực rỡ có ảnh Vàng) -->
+        <div id="final-tab" class="tab-content">
+            {% for match in matches %}
+                {% if match[6] == 'Chung kết' %}
+                    <div class="stage-title final-title">🏆 TRẬN CHUNG KẾT TRONG MƠ 🏆</div>
+                    <div class="final-stage-container">
+                        <div class="final-form-overlay">
+                            <div class="teams" style="justify-content: center; margin-bottom: 10px;">
+                                <span>Đội {{ match[1] }}</span><span class="vs" style="padding: 0 40px;">VS</span><span>Đội {{ match[2] }}</span>
+                            </div>
+                            {% if match[5] %}
+                                <div style="font-size: 24px; color: #fff; margin-bottom: 10px;">Tỉ số Set: <strong style="color:#f1c40f;">{{ match[3] }} - {{ match[4] }}</strong></div>
+                                <h2 class="final-winner-glow">🥇 NHÀ VÔ ĐỊCH: ĐỘI {{ match[5] }} 🥇</h2>
+                            {% else %}
+                                <form action="/update_score" method="POST">
+                                    <input type="hidden" name="match_id" value="{{ match[0] }}">
+                                    <input type="hidden" name="tour_id" value="{{ tour_id }}">
+                                    <input type="hidden" name="stage" value="{{ match[6] }}">
+                                    <input type="hidden" name="is_knockout" value="true">
+                                    
+                                    <div style="display: flex; justify-content: space-around; align-items: center; margin: 15px 0;">
+                                        <div class="set-row" style="margin-bottom:0;">S1: <input type="number" name="set1_a" required> - <input type="number" name="set1_b" required></div>
+                                        <div class="set-row" style="margin-bottom:0;">S2: <input type="number" name="set2_a" required> - <input type="number" name="set2_b" required></div>
+                                        <div class="set-row" style="margin-bottom:0;">S3: <input type="number" name="set3_a"> - <input type="number" name="set3_b"></div>
+                                    </div>
+                                    <div style="font-size: 13px; color: #5dade2; margin-bottom: 15px; font-style: italic;">* Set 3 để trống nếu tỉ số là 2-0</div>
+                                    <button type="submit" style="margin-top: 5px;">KHAI HỎA - CHỐT NHÀ VÔ ĐỊCH</button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <a href="/tournament/{{ tour_id }}" class="back-btn">⬅ Quay lại màn hình Quản lý Vòng Bảng</a>
+
+    <!-- SCRIPT ĐIỀU KHIỂN TAB -->
+    <script>
+        function switchTab(tabId, btnElement) {
+            // Tắt hết giao diện cũ
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            
+            // Bật tab và màu cho nút mới chọn
+            document.getElementById(tabId).classList.add('active');
+            if(btnElement) btnElement.classList.add('active');
+            
+            // Lưu vào bộ nhớ cục bộ để sau khi F5/nhập điểm nó giữ nguyên ở tab đó
+            localStorage.setItem('activeKnockoutTab', tabId);
+        }
+
+        // Khi load trang, tự động mở Tab đang xem dở
+        window.onload = function() {
+            var savedTab = localStorage.getItem('activeKnockoutTab');
+            if (savedTab) {
+                var targetBtn = document.querySelector(`button[onclick*="${savedTab}"]`);
+                if(targetBtn) switchTab(savedTab, targetBtn);
+            }
+        }
+    </script>
+</body>
+</html>

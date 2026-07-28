@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Lịch thi đấu</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background-color: #f4f4f9; }
+        .container { max-width: 800px; margin: auto; }
+        table { border-collapse: collapse; width: 100%; background: white; text-align: center; }
+        th, td { border: 1px solid #ddd; padding: 12px; }
+        th { background-color: #e67e22; color: white; }
+        .winner { font-weight: bold; color: #27ae60; }
+        a.button { display: inline-block; padding: 10px 15px; background: #3498db; color: white; text-decoration: none; border-radius: 5px; margin-bottom: 20px;}
+        .panel-btn { display: inline-block; padding: 8px 15px; color: white; text-decoration: none; border-radius: 5px; margin-right: 10px; font-weight: bold; font-size: 14px;}
+        
+        /* Style mới cho phần danh sách bảng */
+        .group-container { display: flex; gap: 20px; margin-bottom: 30px; justify-content: center; }
+        .group-card { border: 2px solid #ddd; border-radius: 10px; padding: 15px; min-width: 180px; background-color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .group-a-title { color: #d35400; border-bottom: 2px solid #e67e22; margin-bottom: 10px; text-align: center; }
+        .group-b-title { color: #2980b9; border-bottom: 2px solid #3498db; margin-bottom: 10px; text-align: center; }
+        .team-list { list-style: none; padding: 0; text-align: center; margin: 0; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+        <!-- === THANH ĐIỀU KHIỂN TRÊN CÙNG (HEADER) === -->
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ecf0f1; padding-bottom: 15px; margin-bottom: 25px;">
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <a href="/" style="background: #7f8c8d; color: white; padding: 10px 15px; text-decoration: none; border-radius: 6px; font-weight: bold; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    ⬅ Quay lại
+                </a>
+                <h1 style="margin: 0; color: #2c3e50; font-size: 2em;">🏆 Quản lý Giải ID: {{ tour_id }}</h1>
+            </div>
+            
+            <a href="/delete_this_tour/{{ tour_id }}" 
+               style="background-color: #e74c3c; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold;"
+               onclick="return confirm('Bạn có chắc chắn muốn xóa không?');">
+               🗑️ Xóa Giải Này
+            </a>
+        </div>
+        
+        <!-- Bảng điều khiển chọn Thể thức thi đấu MỚI -->
+        <div style="margin-bottom: 20px; padding: 15px; background: #fff; border: 2px solid #ddd; border-radius: 8px;">
+            <h3 style="margin-top: 0; color: #2c3e50;">⚙️ Bảng Điều Khiển Ban Tổ Chức</h3>
+            
+            <div style="margin-bottom: 15px; padding: 10px; background: #e8f8f5; border-radius: 5px;">
+                <strong style="color: #16a085; display: block; margin-bottom: 10px;">CÁCH 1: THỂ THỨC CHIA 2 BẢNG</strong>
+                <a href="/gen_group/{{ tour_id }}" class="panel-btn" style="background-color: #1abc9c;">1. Tạo Bảng A & B</a>
+                <a href="/gen_semi_group/{{ tour_id }}" class="panel-btn" style="background-color: #16a085;">2. Chốt Bán Kết (Nhất A vs Nhì B)</a>
+            </div>
+
+            <div style="margin-bottom: 15px; padding: 10px; background: #fdf2e9; border-radius: 5px;">
+                <strong style="color: #d35400; display: block; margin-bottom: 10px;">CÁCH 2: THỂ THỨC VÒNG TRÒN 1 BẢNG</strong>
+                <a href="/gen_rr/{{ tour_id }}" class="panel-btn" style="background-color: #e67e22;">1. Tạo Lịch Vòng Tròn</a>
+                <a href="/gen_semi_rr/{{ tour_id }}" class="panel-btn" style="background-color: #d35400;">2. Chốt Bán Kết (Top 4)</a>
+            </div>
+
+            <div style="padding: 10px; background: #f5eef8; border-radius: 5px;">
+                <strong style="color: #8e44ad; display: block; margin-bottom: 10px;">BƯỚC CUỐI CÙNG (DÙNG CHUNG)</strong>
+                <a href="/generate_third_place/{{ tour_id }}" class="panel-btn" style="background-color: #e67e22; margin-bottom: 5px;">🥉 3. Tranh Hạng 3</a>
+                <a href="/generate_final_only/{{ tour_id }}" class="panel-btn" style="background-color: #9b59b6; margin-bottom: 5px;">🏆 4. Chung Kết</a>
+            </div>
+        </div>
+
+        <!-- PHẦN HIỂN THỊ DANH SÁCH ĐỘI THEO BẢNG (MỚI THÊM) -->
+        {% if group_a or group_b %}
+        <div class="group-container">
+            {% if group_a %}
+            <div class="group-card" style="border-color: #e67e22;">
+                <h3 class="group-a-title">🔥 BẢNG A</h3>
+                <ul class="team-list">
+                    {% for team_id in group_a %}
+                        <li>Đội {{ team_id }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            {% if group_b %}
+            <div class="group-card" style="border-color: #3498db;">
+                <h3 class="group-b-title">❄️ BẢNG B</h3>
+                <ul class="team-list">
+                    {% for team_id in group_b %}
+                        <li>Đội {{ team_id }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+        <hr style="border: 0; border-top: 1px solid #ddd; margin-bottom: 30px;">
+        {% endif %}
+        
+        <!-- Bảng hiển thị danh sách trận đấu và Form nhập điểm -->
+        <table>
+            <tr>
+                <th>Trận</th>
+                <th>Vòng đấu</th>
+                <th>Đội A</th>
+                <th>Tỉ số</th>
+                <th>Đội B</th>
+                <th>Kết quả</th>
+            </tr>
+            {% for match in matches %}
+            <tr>
+                <td>{{ match[0] }}</td>
+                <td><strong>{{ match[6] }}</strong></td>
+                <td>Đội {{ match[1] }}</td>
+                <td>
+                    {% if match[3] is not none and match[4] is not none %}
+                        <strong>{{ match[3] }} - {{ match[4] }}</strong>
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td>Đội {{ match[2] }}</td>
+                <td>
+                    {% if match[5] %}
+                        <span class="winner" style="color: red; font-weight: bold;">Đội {{ match[5] }} Thắng</span>
+                    {% else %}
+                        <form action="/update_score" method="POST" style="display:inline;">
+                            <input type="hidden" name="match_id" value="{{ match[0] }}">
+                            <input type="hidden" name="tour_id" value="{{ tour_id }}">
+                            <input type="hidden" name="stage" value="{{ match[6] }}">
+                            
+                            {% if match[6] == 'Bán kết 1' or match[6] == 'Bán kết 2' or match[6] == 'Chung kết' or match[6] == 'Tranh hạng 3' %}
+                                <div style="font-size: 12px; margin-bottom: 4px;">
+                                    S1: <input type="number" name="set1_a" required style="width: 35px; text-align: center;"> - <input type="number" name="set1_b" required style="width: 35px; text-align: center;">
+                                </div>
+                                <div style="font-size: 12px; margin-bottom: 4px;">
+                                    S2: <input type="number" name="set2_a" required style="width: 35px; text-align: center;"> - <input type="number" name="set2_b" required style="width: 35px; text-align: center;">
+                                </div>
+                                <div style="font-size: 12px; margin-bottom: 4px;">
+                                    S3: <input type="number" name="set3_a" style="width: 35px; text-align: center;"> - <input type="number" name="set3_b" style="width: 35px; text-align: center;"> 
+                                </div>
+                                <div style="font-size: 11px; color: gray;">(Set 3 để trống nếu thắng 2-0)</div>
+                            {% else %}
+                                <input type="number" name="score_a" placeholder="A" required style="width: 40px; text-align: center; padding: 5px;">
+                                -
+                                <input type="number" name="score_b" placeholder="B" required style="width: 40px; text-align: center; padding: 5px;">
+                            {% endif %}
+                            
+                            <button type="submit" style="background-color: #f39c12; color: white; border: none; padding: 6px 10px; cursor: pointer; border-radius: 3px; font-weight: bold; margin-top: 5px; width: 100%;">Lưu Điểm</button>
+                        </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</body>
+</html>
