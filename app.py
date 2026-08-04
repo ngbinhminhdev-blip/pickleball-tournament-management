@@ -1,34 +1,49 @@
 from flask import Flask, render_template, request, redirect, url_for
-from manager import TournamentManager
+
+# 1. Import các module mới thay cho file manager cũ
+from database import DatabaseHelper
+from player_manager import PlayerManager
+from team_manager import TeamManager
+from match_manager import MatchManager
 
 app = Flask(__name__)
-manager = TournamentManager()
+
+# 2. Khởi tạo Database và các Manager
+db = DatabaseHelper()
+player_mgr = PlayerManager(db)
+team_mgr = TeamManager(db)
+match_mgr = MatchManager(db)
 
 @app.route('/')
 def home():
-    all_players = manager.get_all_players()
-    all_teams = manager.get_all_teams()
-    all_tours = manager.get_all_tournaments() # Lấy thêm danh sách giải
+    # Chia việc cho đúng quản lý
+    all_players = player_mgr.get_all_players()
+    all_teams = team_mgr.get_all_teams()
+    all_tours = match_mgr.get_all_tournaments()
     return render_template('index.html', players=all_players, teams=all_teams, tournaments=all_tours)
 
 @app.route('/add_tournament', methods=['POST'])
 def add_tournament():
     name = request.form.get('tour_name')
     if name:
-        manager.create_tournament(name)
+        match_mgr.create_tournament(name, "Group") # Mặc định format hoặc bạn có thể bắt từ form
     return redirect(url_for('home'))
 
 @app.route('/add_player', methods=['POST'])
 def add_player():
     name = request.form.get('name')
-    phone = request.form.get('phone') # Đổi chữ email thành phone
+    phone = request.form.get('phone')
     gender = request.form.get('gender') 
     
     if name and phone and gender:
-        manager.add_player(name, phone, gender) # Truyền phone vào hàm
+        player_mgr.add_player(name, phone, gender) 
         
     return redirect(url_for('home'))
 
+@app.route('/delete_player/<int:player_id>')
+def delete_player(player_id):
+    player_mgr.delete_player(player_id)
+    return redirect(url_for('home'))
 
 @app.route('/add_team', methods=['POST'])
 def add_team():
@@ -36,34 +51,34 @@ def add_team():
     p2_id = request.form.get('player2')
  
     if p1_id and p2_id and p1_id != p2_id:
-        manager.create_team(int(p1_id), int(p2_id))
+        team_mgr.create_team(int(p1_id), int(p2_id))
         
     return redirect(url_for('home'))
 
 
 @app.route('/clear_teams')
 def clear_teams():
-    manager.clear_all_teams()
+    team_mgr.clear_all_teams()
     return redirect(url_for('home'))
 
 @app.route('/auto_pair_mixed')
 def auto_pair_mixed():
-    manager.auto_pair_mixed()
+    team_mgr.auto_pair_mixed()
     return redirect(url_for('home'))
 
 @app.route('/auto_pair_men')
 def auto_pair_men():
-    manager.auto_pair_same_gender('Nam')
+    team_mgr.auto_pair_same_gender('Nam')
     return redirect(url_for('home'))
 
 @app.route('/auto_pair_women')
 def auto_pair_women():
-    manager.auto_pair_same_gender('Nữ')
+    team_mgr.auto_pair_same_gender('Nữ')
     return redirect(url_for('home'))
 
 @app.route('/tournament/<int:tournament_id>')
 def tournament(tournament_id):
-    matches = manager.get_matches(tournament_id)
+    matches = match_mgr.get_matches(tournament_id)
     group_a_teams = []
     group_b_teams = []
     
@@ -73,7 +88,6 @@ def tournament(tournament_id):
         elif m[6] == 'Bảng B':
             group_b_teams.extend([m[1], m[2]])
             
-
     group_a = sorted(list(set(group_a_teams)))
     group_b = sorted(list(set(group_b_teams)))
     
@@ -86,7 +100,7 @@ def tournament(tournament_id):
 
 @app.route('/knockout/<int:tournament_id>')
 def knockout_stage(tournament_id):
-    all_matches = manager.get_matches(tournament_id)
+    all_matches = match_mgr.get_matches(tournament_id)
     knockout_matches = [m for m in all_matches if 'Bán kết' in m[6] or 'Chung kết' in m[6] or 'Tranh hạng 3' in m[6]]
     
     def is_valid(m):
@@ -134,7 +148,8 @@ def update_score():
             elif s3b > s3a: win_sets_b += 1
 
         if match_id and win_sets_a != win_sets_b:
-            manager.update_score(match_id, win_sets_a, win_sets_b)
+            # Lưu ý: Hàm này hiện lưu số Set thắng vào cột Score.
+            match_mgr.update_score(match_id, win_sets_a, win_sets_b)
 
         return redirect(url_for('knockout_stage', tournament_id=tournament_id))
 
@@ -143,48 +158,52 @@ def update_score():
         score_b = request.form.get('score_b', type=int)
 
         if match_id and score_a is not None and score_b is not None:
-            manager.update_score(match_id, score_a, score_b)
+            match_mgr.update_score(match_id, score_a, score_b)
 
         return redirect(url_for('tournament', tournament_id=tournament_id))
 
 @app.route('/gen_group/<int:tournament_id>')
 def gen_group(tournament_id):
     print(f"📢 ALO ALO! ĐÃ BẤM NÚT TẠO BẢNG CHO GIẢI {tournament_id}")
-    manager.generate_group_stage(tournament_id)
+    match_mgr.generate_group_stage(tournament_id)
     return redirect(url_for('tournament', tournament_id=tournament_id))
 
 @app.route('/gen_semi_group/<int:tournament_id>')
 def gen_semi_group(tournament_id):
-    manager.generate_semi_finals_group(tournament_id)
+    match_mgr.generate_semi_finals_group(tournament_id)
     return redirect(url_for('knockout_stage', tournament_id=tournament_id))
 
 
 @app.route('/gen_rr/<int:tournament_id>')
 def gen_rr(tournament_id):
-    manager.generate_round_robin(tournament_id)
+    match_mgr.generate_round_robin(tournament_id)
     return redirect(url_for('tournament', tournament_id=tournament_id))
 
 @app.route('/gen_semi_rr/<int:tournament_id>')
 def gen_semi_rr(tournament_id):
-    manager.generate_semi_finals_rr(tournament_id)
+    # GHI CHÚ: Nếu bạn chưa định nghĩa hàm generate_semi_finals_rr trong match_manager, 
+    # route này khi bấm vào sẽ báo lỗi. Nếu bạn dùng chia bảng, có thể bỏ qua route này.
+    try:
+        match_mgr.generate_semi_finals_rr(tournament_id)
+    except AttributeError:
+        print("Cảnh báo: Tính năng bán kết cho Vòng tròn (RR) chưa được định nghĩa!")
     return redirect(url_for('tournament', tournament_id=tournament_id))
 
 @app.route('/generate_third_place/<int:tournament_id>')
 def generate_third_place_route(tournament_id):
-    manager.generate_third_place(tournament_id)
-   
+    match_mgr.generate_third_place(tournament_id)
     return redirect(f'/knockout/{tournament_id}')
 
 @app.route('/generate_final_only/<int:tournament_id>')
 def generate_final_only_route(tournament_id):
-    manager.generate_final_only(tournament_id)
+    match_mgr.generate_final_only(tournament_id)
     return redirect(f'/knockout/{tournament_id}')
 
 
 @app.route('/delete_this_tour/<int:tournament_id>')
 def delete_tour_final(tournament_id):
     try:
-        manager.delete_tournament(tournament_id)
+        match_mgr.delete_tournament(tournament_id)
     except Exception as e:
         print(f"Lỗi: {e}") 
     return redirect(url_for('home'))

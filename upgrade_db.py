@@ -1,39 +1,38 @@
 import sqlite3
 
-
 def upgrade_database():
     conn = sqlite3.connect("pickleball.db")
     cursor = conn.cursor()
 
-    # Add Best-of-3 match score columns
+    # 1. Thêm các cột điểm BO3 vào bảng matches
     score_columns = [
-        "set1_a",
-        "set1_b",
-        "set2_a",
-        "set2_b",
-        "set3_a",
-        "set3_b",
+        "set1_a", "set1_b",
+        "set2_a", "set2_b",
+        "set3_a", "set3_b",
     ]
 
     for column in score_columns:
         try:
-            cursor.execute(
-                f"ALTER TABLE matches ADD COLUMN {column} INTEGER DEFAULT 0"
-            )
-            print(f"Added column: {column}")
+            cursor.execute(f"ALTER TABLE matches ADD COLUMN {column} INTEGER DEFAULT 0")
+            print(f"✅ Đã thêm cột: {column}")
         except sqlite3.OperationalError:
-            print(f"Column '{column}' already exists.")
+            print(f"ℹ️ Cột '{column}' đã tồn tại.")
 
-    # Add tournament ID column
+    # 2. Thêm cột tournament_id vào bảng matches
     try:
-        cursor.execute(
-            "ALTER TABLE matches ADD COLUMN tournament_id INTEGER DEFAULT 1"
-        )
-        print("Added column: tournament_id")
+        cursor.execute("ALTER TABLE matches ADD COLUMN tournament_id INTEGER DEFAULT 1")
+        print("✅ Đã thêm cột: tournament_id")
     except sqlite3.OperationalError:
-        print("Column 'tournament_id' already exists.")
+        print("ℹ️ Cột 'tournament_id' đã tồn tại.")
 
-    # Create tournament_players table
+    # 3. Thêm cột elo_rating vào bảng players (Cập nhật mới nhất)
+    try:
+        cursor.execute("ALTER TABLE players ADD COLUMN elo_rating INTEGER DEFAULT 1200")
+        print("✅ Đã thêm cột: elo_rating vào bảng players")
+    except sqlite3.OperationalError:
+        print("ℹ️ Cột 'elo_rating' đã tồn tại.")
+
+    # 4. Tạo bảng tournament_players (Dùng để quản lý người chơi trong từng giải)
     try:
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS tournament_players (
@@ -43,15 +42,14 @@ def upgrade_database():
                 UNIQUE(tournament_id, player_id)
             )
         """)
-        print("Created table: tournament_players")
+        print("✅ Đã kiểm tra/Tạo bảng: tournament_players")
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"❌ Lỗi khi tạo bảng tournament_players: {e}")
 
     conn.commit()
     conn.close()
 
-    print("Database upgrade completed successfully.")
-
+    print("🎉 Quá trình nâng cấp Database hoàn tất!")
 
 if __name__ == "__main__":
     upgrade_database()

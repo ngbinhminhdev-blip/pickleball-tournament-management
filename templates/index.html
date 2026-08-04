@@ -61,6 +61,7 @@
                 <th>Tên Người Chơi</th>
                 <th>Giới Tính</th> 
                 <th>Số Điện Thoại</th>
+                <th>Hành động</th>
             </tr>
             {% for player in players %}
             <tr>
@@ -73,6 +74,12 @@
                     {% endif %}
                 </td> 
                 <td>{{ player[2] }}</td> 
+                <td style="text-align: center;">
+                    <a href="/delete_player/{{ player[0] }}" 
+                       onclick="return confirm('Bạn có chắc chắn muốn xóa VĐV {{ player[1] }} không?');" 
+                       style="background-color: #e74c3c; color: white; padding: 6px 12px; text-decoration: none; border-radius: 4px; font-size: 13px; font-weight: bold;">
+                       🗑️ Xóa
+                    </a>
             </tr>
             {% endfor %}
         </table>
