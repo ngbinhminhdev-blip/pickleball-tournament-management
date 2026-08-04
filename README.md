@@ -1,89 +1,39 @@
-# Pickleball Tournament Management System
+# 🏓 Pickleball Tournament Management System
 
-A web-based application for managing Pickleball tournaments, developed with Flask. The system helps organizers manage tournaments, players, and match schedules through a simple web interface.
+A robust, service-oriented web application built with Python and Flask for managing local Pickleball tournaments. This system handles everything from player registration and automated team pairing to complex match generation (Round Robin & Knockout) and Best-of-3 (BO3) score tracking.
 
-## Features
+## ✨ Key Features
 
-- Create and manage Pickleball tournaments
-- Register players for tournaments
-- Manage tournament participants
-- Generate and manage match schedules
-- Record Best-of-3 match scores
-- Display tournament information dynamically using Jinja2 templates
+- **Player & Team Management:** Register players, track their Elo ratings, and automatically generate fair match-ups (Mixed Doubles, Men's/Women's Doubles) or allow manual pairings.
+- **Dynamic Tournament Formats:** Support for multiple formats including Group Stage + Knockout and single Round Robin.
+- **Automated Scheduling:** Automatically generates matches based on the selected format and distributes teams into distinct groups (e.g., Group A and Group B).
+- **BO3 Scoring System:** Specialized tracking for Best-of-3 matches, enforcing rule validation, and automatically determining winners to advance them to the next bracket.
+- **Real-time Leaderboards:** Instantly calculates standings based on win rates and point differentials.
 
-## Technologies
+## 🏗 Architecture & Refactoring
 
-- Python
-- Flask
-- Jinja2
-- HTML
-- CSS
-- SQLite
-- Git
+This project was intentionally refactored from a monolithic structure (a single "God Object" managing all database interactions) into a clean, **Modular Service-Oriented Architecture**. This approach significantly improves scalability, debugging, and code maintainability.
 
-## Project Structure
+### Core Modules:
+- `database.py`: Centralized SQLite database connection management.
+- `player_manager.py`: Handles player CRUD operations and tournament enrollment.
+- `team_manager.py`: Contains algorithms for randomized team pairings and bracket seeding.
+- `match_manager.py`: The core algorithmic engine responsible for stage transitions (Semi-finals, Third Place, Finals) and complex query execution (e.g., handling tie-breakers and BO3 score validation).
 
-```
-├── app.py
-├── init_db.py
-├── manager.py
-├── upgrade_db.py
-├── static/
-├── templates/
-└── README.md
-```
+## 🛠 Tech Stack
 
-## Installation
+- **Backend:** Python 3, Flask
+- **Database:** SQLite3 (Custom relational schema with strict UNIQUE constraints and automated indexing)
+- **Frontend:** HTML5, CSS3, Jinja2 (Dynamic templating)
 
-1. Clone the repository
+## 🚀 Getting Started
 
-```bash
-git clone https://github.com/your-username/pickleball-tournament-management.git
-```
+### Prerequisites
+Make sure you have Python 3.x installed on your machine.
 
-2. Install dependencies
+### Installation
 
-```bash
-pip install flask
-```
-
-3. Initialize the database
-
-```bash
-python init_db.py
-```
-
-4. Run the application
-
-```bash
-python app.py
-```
-
-5. Open your browser and visit:
-
-```
-http://127.0.0.1:5000
-```
-
-## Project Status
-
-🚧 **In Progress**
-
-Current progress:
-- Tournament management
-- Player management
-- Match management
-- Database design
-- Ongoing frontend improvements
-
-## Future Improvements
-
-- User authentication
-- Automatic match scheduling
-- Tournament brackets
-- Statistics dashboard
-- Responsive UI
-
-## Author
-
-**Minh Nguyen**
+1. **Clone the repository**
+   ```bash
+   git clone [https://github.com/ngbinhminhdev-blip/pickleball-tournament-management]
+   cd pickleball-tournament-app
